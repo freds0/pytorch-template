@@ -1,9 +1,8 @@
 import torch
 from abc import abstractmethod
 from numpy import inf
-from logger import TensorboardWriter
-
-
+from tensorboardX import SummaryWriter
+import os
 class BaseTrainer:
     """
     Base class for all trainers
@@ -42,8 +41,11 @@ class BaseTrainer:
 
         self.checkpoint_dir = config.save_dir
 
-        # setup visualization writer instance                
-        self.writer = TensorboardWriter(config.log_dir, self.logger, cfg_trainer['tensorboard'])
+        train_log_dir = os.path.join(config.log_dir, 'train')
+        val_log_dir = os.path.join(config.log_dir, 'val')
+        # setup visualization writer instance
+        self.train_writer = SummaryWriter(log_dir=train_log_dir)
+        self.val_writer = SummaryWriter(log_dir=val_log_dir)
 
         if config.resume is not None:
             self._resume_checkpoint(config.resume)
@@ -115,6 +117,7 @@ class BaseTrainer:
                                 "on this machine.".format(n_gpu_use, n_gpu))
             n_gpu_use = n_gpu
         device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
+        self.logger.info("Device available: {}.".format(device))
         list_ids = list(range(n_gpu_use))
         return device, list_ids
 
@@ -165,7 +168,8 @@ class BaseTrainer:
         if checkpoint['config']['optimizer']['type'] != self.config['optimizer']['type']:
             self.logger.warning("Warning: Optimizer type given in config file is different from that of checkpoint. "
                                 "Optimizer parameters not being resumed.")
-        else:
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
+        #else:
+        #    self.optimizer.load_state_dict(checkpoint['optimizer'])
+        self.optimizer.load_state_dict(checkpoint['optimizer'])
 
         self.logger.info("Checkpoint loaded. Resume training from epoch {}".format(self.start_epoch))

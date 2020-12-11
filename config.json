@@ -3,7 +3,7 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "MnistModel",
+        "type": "LeNet5",
         "args": {}
     },
     "data_loader": {
@@ -43,7 +43,7 @@
         "verbosity": 2,
         
         "monitor": "min val_loss",
-        "early_stop": 10,
+        "early_stop": 2,
 
         "tensorboard": true
     }
